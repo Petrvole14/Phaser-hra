@@ -41,14 +41,20 @@ function preload() {
     });
     this.load.image("podlaha", "obrazky/podlaha.webp");
     this.load.image("coin", "obrazky/coin.png");
+    this.load.image("background", "../obrazky/background.png");
 }
 
 function create() {
-    player = this.physics.add.sprite(100, 100, "player");
+    player = this.physics.add.sprite(100, 100, "player").setDepth(1);
 
     ground = this.physics.add.staticGroup();
+    
 
-    ground.create(300, 500, "podlaha").setScale(1).refreshBody();
+    this.add.image(300, 300, "background").setScale(10).setDepth(-1);
+
+    ground.create(300, 500, "podlaha").setScale(1.8).refreshBody();
+
+    this.cameras.main.startFollow(player, true, 0.05, 0.05);
 
     enemy = this.physics.add.sprite(400, 100, "player");
     enemy.setVelocityX(100);
@@ -77,16 +83,50 @@ function create() {
 
     
     this.physics.add.collider(ground, coin);
+    this.physics.add.collider(ground, coin1);
+    this.physics.add.collider(ground, coin2);
+    this.physics.add.collider(ground, coin3);
+    this.physics.add.collider(ground, coin4);
 
     this.physics.add.collider(player, ground);
 
     this.physics.add.collider(player, enemy);
+
+    this.physics.add.collider(enemy, ground, () => {
+        enemy.setVelocityX(100);
+    });
+    
+    
 
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ff0000' });
     livesText = this.add.text(16, 50, 'Lives: 3', { fontSize: '32px', fill: '#ff0000' });
 
     this.physics.add.overlap(player, coin, () => {
         coin.disableBody(true, true);
+        score += 10;
+        scoreText.setText('Score: ' + score);
+    });
+
+    this.physics.add.overlap(player, coin1, () => {
+        coin1.disableBody(true, true);
+        score += 10;
+        scoreText.setText('Score: ' + score);
+    });
+
+    this.physics.add.overlap(player, coin2, () => {
+        coin2.disableBody(true, true);
+        score += 10;
+        scoreText.setText('Score: ' + score);
+    });
+
+    this.physics.add.overlap(player, coin3, () => {
+        coin3.disableBody(true, true);
+        score += 10;
+        scoreText.setText('Score: ' + score);
+    });
+
+    this.physics.add.overlap(player, coin4, () => {
+        coin4.disableBody(true, true);
         score += 10;
         scoreText.setText('Score: ' + score);
     });
@@ -106,9 +146,14 @@ function create() {
     platform1.setCollideWorldBounds(true);
     platform1.setBounce(1);
     
-    this.physics.add.collider(player, skyPlatform);
+    
+    this.physics.add.collider(enemy, skyPlatform, () => {
+        enemy.setVelocityX(55);
+    });
 
-
+    this.physics.add.collider(player, platform1, () => {
+        player.setVelocityX(55);
+    });
 
 
 
