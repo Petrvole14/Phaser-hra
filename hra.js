@@ -55,6 +55,7 @@ function preload() {
     this.load.image("coin", "obrazky/coin.png");
     this.load.audio("meele", "zvuky/meele.mp3");
     this.load.audio("jump", "zvuky/jump.mp3");
+    this.load.audio("coin", "zvuky/coin.mp3");
     this.load.spritesheet("coinspin", "obrazky/Coin.png", { frameWidth: 32, frameHeight: 32 });
     this.load.image("shop", "obrazky/shop.webp");
     this.load.image("shopbackground", "obrazky/shop_menu.png");
@@ -214,6 +215,8 @@ function create() {
         score += 5;
         scoreText.setText('Score: ' + score);
         coin.setPosition(Math.floor(Math.random() * 1000) + 750, 900);
+        this.coinSound = this.sound.add("coin", { volume: 0.05 });
+        this.coinSound.play();
     });
     
 
