@@ -86,7 +86,7 @@ function create() {
 
 
 
-    
+
     
     //prvni menu//
 
@@ -181,6 +181,9 @@ function create() {
     pixelground = this.physics.add.staticGroup();
     for (let i = 0; i < 100; i++) {
         pixelground.create(i * 60, 1050, "pixelgroud").setScale(2, 2).refreshBody();
+    }
+    for (let i = 0; i < 25; i++) {
+        pixelground.create(i * 60 - -2500, 850, "pixelgroud").setScale(2, 2).refreshBody();
     }
     
 
