@@ -14,6 +14,13 @@ const config = {
         preload: preload,
         create: create,
         update: update
+    },
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+
+
+        
     }
 };
 
@@ -52,19 +59,59 @@ function preload() {
     this.load.spritesheet("enemy", "obrazky/enemywalk.png", { frameWidth: 32, frameHeight: 32 });
     this.load.image("ground", "obrazky/podlaha.webp");
     this.load.image("background", "obrazky/background2.png");
-    this.load.image("coin", "obrazky/coin.png");
+    this.load.spritesheet("coin" , "obrazky/coin.png", { frameWidth: 16, frameHeight: 16 });
     this.load.audio("meele", "zvuky/meele.mp3");
     this.load.audio("jump", "zvuky/jump.mp3");
     this.load.audio("coin", "zvuky/coin.mp3");
     this.load.spritesheet("coinspin", "obrazky/Coin.png", { frameWidth: 32, frameHeight: 32 });
     this.load.image("shop", "obrazky/shop.webp");
     this.load.image("shopbackground", "obrazky/shop_menu.png");
+    this.load.spritesheet("pixelgroud", "obrazky/platforms.png", { frameWidth: 32, frameHeight: 16 });
+    this.load.image("menubg", "obrazky/menu.gif");
+    this.load.audio("backgroundmusic", "zvuky/music.mp3");
+    
     
     
     
 }
 
 function create() {
+    this.physics.world.setBounds(0, 0, 6000, 1080);
+    this.cameras.main.setBounds(0, 0, 6000, 1080);
+
+    //pisnicka//
+
+    backgroundMusic = this.sound.add("backgroundmusic", { loop: true, volume: 0.1 });
+    backgroundMusic.play();
+
+
+
+    
+    
+    //prvni menu//
+
+//prvni menu//
+    const img = this.add.image(960, 540, "menubg");
+    img.setScrollFactor(0);
+    img.setDepth(20);
+    img.setInteractive();
+
+    img.on('pointerdown', (pointer, localX, localY) => {
+        if (localX > 708 && localX < 1212 && localY > 492 && localY < 612) {
+            img.setVisible(false);
+            img.disableInteractive();
+        }
+    });   
+
+            
+    
+    
+    
+
+    
+
+
+    
     //text//
     scoreText = this.add.text(50, 50, 'Score: 0', { fontSize: '32px', fill: '#000' });  
     scoreText.setScrollFactor(0);
@@ -130,13 +177,21 @@ function create() {
     // zem //
 
     ground = this.physics.add.staticGroup();
-    ground.create(750, 1060, "ground").setScale(5, 2).refreshBody();
+    
+    pixelground = this.physics.add.staticGroup();
+    for (let i = 0; i < 100; i++) {
+        pixelground.create(i * 60, 1050, "pixelgroud").setScale(2, 2).refreshBody();
+    }
+    
+
+    
+    
 
 
     // hráč //
     player = this.physics.add.sprite(100, 450, "playeridle");
     player.setCollideWorldBounds(true);
-    this.physics.add.collider(player, ground);
+    this.physics.add.collider(player, pixelground);
     player.setDepth(10);
     player.setScale(2);
     player.setPosition(300, 900);
@@ -146,7 +201,7 @@ function create() {
 
     enemy = this.physics.add.sprite(1500, 450, "enemy");
     enemy.setCollideWorldBounds(true);
-    this.physics.add.collider(enemy, ground);
+    this.physics.add.collider(enemy, pixelground);
     enemy.setScale(3);
     enemy.setPosition(Math.floor(Math.random() * 500) + 750, 900);   
     enemy.setVelocityX(-50);
@@ -155,7 +210,7 @@ function create() {
 
     enemy1 = this.physics.add.sprite(1500, 450, "enemy");
     enemy1.setCollideWorldBounds(true);
-    this.physics.add.collider(enemy1, ground);
+    this.physics.add.collider(enemy1, pixelground);
     enemy1.setScale(3);
     enemy1.setPosition(Math.floor(Math.random() * 900) + 750, 900);   
     enemy1.setVelocityX(-50);
@@ -163,7 +218,7 @@ function create() {
 
     enemy2 = this.physics.add.sprite(1500, 450, "enemy");
     enemy2.setCollideWorldBounds(true);
-    this.physics.add.collider(enemy2, ground);
+    this.physics.add.collider(enemy2, pixelground);
     enemy2.setScale(3);
     enemy2.setPosition(Math.floor(Math.random() * 1200) + 750, 900);   
     enemy2.setVelocityX(-50);
@@ -205,26 +260,16 @@ function create() {
 
 
     //coin//
-    coin = this.add.sprite(Math.floor(Math.random() * 1000) + 750, 900, "coinspin");
-    coin.setScale(3);
-    this.physics.add.existing(coin);
-    coin.body.setAllowGravity(false);
-    coin.anims.play("coinspin", true);
     
-    this.physics.add.overlap(player, coin, () => {
-        score += 5;
-        scoreText.setText('Score: ' + score);
-        coin.setPosition(Math.floor(Math.random() * 1000) + 750, 900);
-        this.coinSound = this.sound.add("coin", { volume: 0.05 });
-        this.coinSound.play();
-    });
+    
+    
     
 
     
 
     //controls//
     cursors = this.input.keyboard.createCursorKeys();
-    this.cameras.main.startFollow(player, true, 0.05, 0.05);
+    this.cameras.main.startFollow(player, true, 0.1, 0.1);
 
 
     //hitbox//
@@ -312,10 +357,35 @@ function create() {
     });
     this.anims.create({
         key: "coinspin",
-        frames: this.anims.generateFrameNumbers("coinspin", { start: 0, end: 5 }),
+        frames: this.anims.generateFrameNumbers("coin", { start: 0, end: 7 }),
         frameRate: 10,
         repeat: -1
     });
+
+    //coin//
+    
+
+    
+    coins = this.physics.add.staticGroup();
+
+    for (let i = 0; i < 10; i++) {
+        const coin = coins.create(Math.floor(Math.random() * 4000) + 750, 900, "coin");
+        coin.anims.play("coinspin", true);
+        coin.setScale(4);
+        
+        
+    }
+
+    this.physics.add.overlap(player, coins, (player, coin) => {
+        coin.disableBody(true, true);
+        score += 10;
+        scoreText.setText('Score: ' + score);
+        this.coinSound = this.sound.add("coin", { volume: 0.1 });
+        this.coinSound.play();
+    });
+
+    
+    
 }
 
 function update() {
