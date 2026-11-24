@@ -47,6 +47,7 @@ let jumpPower = 400;
 let counterzombie = 0;
 let bowser;
 let bowserPlayed = false;
+let box;
 
 
 
@@ -69,6 +70,7 @@ function preload() {
     this.load.spritesheet("pixelgroud", "obrazky/platforms.png", { frameWidth: 32, frameHeight: 16 });
     this.load.image("menubg", "obrazky/menu.gif");
     this.load.audio("backgroundmusic", "zvuky/music.mp3");
+    this.load.image("luckybox", "obrazky/luckybox.webp");
     
     
     
@@ -81,15 +83,13 @@ function create() {
 
     //pisnicka//
 
-    backgroundMusic = this.sound.add("backgroundmusic", { loop: true, volume: 0.1 });
+    backgroundMusic = this.sound.add("backgroundmusic", { loop: true, volume: 0.25 });
     backgroundMusic.play();
 
 
 
 
     
-    //prvni menu//
-
 //prvni menu//
     const img = this.add.image(960, 540, "menubg");
     img.setScrollFactor(0);
@@ -182,7 +182,7 @@ function create() {
     for (let i = 0; i < 100; i++) {
         pixelground.create(i * 60, 1050, "pixelgroud").setScale(2, 2).refreshBody();
     }
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 15; i++) {
         pixelground.create(i * 60 - -2500, 850, "pixelgroud").setScale(2, 2).refreshBody();
     }
     
@@ -198,6 +198,18 @@ function create() {
     player.setDepth(10);
     player.setScale(2);
     player.setPosition(300, 900);
+
+    // Lucky box
+    box = this.physics.add.staticImage(2000, 900, "luckybox").setScale(0.1).refreshBody();
+    box.setDepth(10);
+    this.physics.add.overlap(player, box, () => {
+        box.disableBody(true, true);
+        score += 50;
+        scoreText.setText('Score: ' + score);
+        this.coinSound = this.sound.add("coin", { volume: 0.1 });
+        this.coinSound.play();
+    });
+
     //enemy//
     
    
