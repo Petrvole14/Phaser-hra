@@ -48,6 +48,10 @@ let counterzombie = 0;
 let bowser;
 let bowserPlayed = false;
 let box;
+let enemy3hit = false;
+let enemysecondcounter = 0;
+let enemy3;         
+let enemy4;
 
 
 
@@ -71,6 +75,7 @@ function preload() {
     this.load.image("menubg", "obrazky/menu.gif");
     this.load.audio("backgroundmusic", "zvuky/music.mp3");
     this.load.image("luckybox", "obrazky/luckybox.webp");
+    this.load.image("zombie2", "obrazky/Zombie.png");
     
     
     
@@ -102,6 +107,8 @@ function create() {
             img.disableInteractive();
         }
     });   
+    //animace
+ 
 
             
     
@@ -113,12 +120,19 @@ function create() {
 
     
     //text//
-    scoreText = this.add.text(50, 50, 'Score: 0', { fontSize: '32px', fill: '#000' });  
+    scoreText = this.add.text(50, 50, 'Score: 0', { fontSize: '32px', fill: '#000' }); 
+     
     scoreText.setScrollFactor(0);
     scoreText.setDepth(10);
     scoreText.setPosition(50, 100);
     scoreText.setFontFamily('Arial');
     scoreText.setColor('#fa0707');
+    livesText = this.add.text(50, 50, 'Lives: 3', { fontSize: '32px', fill: '#000' });
+    livesText.setScrollFactor(0);
+    livesText.setDepth(10);
+    livesText.setPosition(50, 150);
+    livesText.setFontFamily('Arial');
+    livesText.setColor('#fa0707');
 
 
     //shop//
@@ -179,21 +193,31 @@ function create() {
     ground = this.physics.add.staticGroup();
     
     pixelground = this.physics.add.staticGroup();
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 45; i+= 1) {
         pixelground.create(i * 60, 1050, "pixelgroud").setScale(2, 2).refreshBody();
     }
     for (let i = 0; i < 15; i++) {
         pixelground.create(i * 60 - -2500, 850, "pixelgroud").setScale(2, 2).refreshBody();
     }
-    
 
-    
-    
+    for (let i = 0; i < 15; i++) {
+        pixelground.create(i * 60 - -3500, 650, "pixelgroud").setScale(2, 2).refreshBody();
+    }
+
+    // 
+    this.anims.create({
+        key: "enemywalk2",
+        frames: this.anims.generateFrameNumbers("zombie2", { start: 0, end: 7 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+
 
 
     // hráč //
     player = this.physics.add.sprite(100, 450, "playeridle");
-    player.setCollideWorldBounds(true);
+    
     this.physics.add.collider(player, pixelground);
     player.setDepth(10);
     player.setScale(2);
@@ -238,6 +262,26 @@ function create() {
     enemy2.setPosition(Math.floor(Math.random() * 1200) + 750, 900);   
     enemy2.setVelocityX(-50);
     enemy2.anims.play("enemywalk", true);
+    
+
+    enemy3 = this.physics.add.sprite(1500, 450, "enemy");
+    enemy3.setCollideWorldBounds(true);
+    this.physics.add.collider(enemy3, pixelground);
+    enemy3.setScale(3);
+    enemy3.setPosition(Math.floor(Math.random() * 1500) + 750, 900);   
+    enemy3.setVelocityX(-50);
+    enemy3.anims.play("enemywalk", true);
+
+    enemy4 = this.physics.add.sprite(1500, 450, "zombie2");
+    enemy4.setCollideWorldBounds(true);
+    this.physics.add.collider(enemy4, pixelground);
+    enemy4.setScale(3);
+    enemy4.setPosition(Math.floor(Math.random() * 1800) + 750, 900);
+    enemy4.setVelocityX(-50);
+    enemy4.anims.play("enemywalk", true);
+
+
+
 
     
 
@@ -270,6 +314,15 @@ function create() {
             enemydirection *= -1;
             enemy2.setVelocityX(50 * enemydirection);
             enemy2.flipX = enemydirection === 1;
+        }
+    });
+    this.time.addEvent({
+        delay: 2000,
+        loop: true,
+        callback: () => {
+            enemydirection *= -1;
+            enemy3.setVelocityX(50 * enemydirection);
+            enemy3.flipX = enemydirection === 1;
         }
     });
 
@@ -338,8 +391,28 @@ function create() {
             });
         }
     });
+    this.physics.add.overlap(hitbox, enemy3, () => {
+        if (!attacking || enemy3hit) return;
+        
+        
+        enemy3hit = true;
+        enemysecondcounter += 1;
+        
+        if (enemysecondcounter >= 3) {
+            enemy3.disableBody(true, true);
+            enemysecondcounter = 0;
+            score += 10;
+            counterzombie += 1;
+            scoreText.setText('Score: ' + score);
             
-    
+                
+            
+            this.time.delayedCall(2000, () => {
+                enemy3.enableBody(true, Math.floor(Math.random() * 1500) + 750, 900, true, true);
+                
+            });
+        }
+    });
 
 
 
@@ -377,18 +450,23 @@ function create() {
         repeat: -1
     });
 
+
     //coin//
     
 
     
     coins = this.physics.add.staticGroup();
 
-    for (let i = 0; i < 10; i++) {
-        const coin = coins.create(Math.floor(Math.random() * 4000) + 750, 900, "coin");
+    for (let i = 0; i < 5; i++) {
+        const coin = coins.create(Math.floor(Math.random() * 1750) + 750, 900, "coin");
         coin.anims.play("coinspin", true);
         coin.setScale(4);
-        
-        
+    }
+
+    for (let i = 0; i < 5; i++) {
+        const coin = coins.create(Math.floor(Math.random() * 2000) + 2500, 750, "coin");
+        coin.anims.play("coinspin", true);
+        coin.setScale(4);
     }
 
     this.physics.add.overlap(player, coins, (player, coin) => {
@@ -414,9 +492,10 @@ function update() {
 
     if (cursors.space.isDown) {
         attacking = true;
+        enemy3hit = false;
         this.meeleSound = this.sound.add("meele", { volume: 0.1 });
         this.meeleSound.play();
-
+        
         
         player.anims.play("attack", true);
         player.once("animationcomplete", () => {
@@ -444,6 +523,14 @@ function update() {
         this.jumpSound.play();
         player.setVelocityY(-jumpPower);
     }
+
+    if (player.y > 1080) {
+        player.setPosition(300, 900);
+        lives -= 1;
+        livesText.setText('Lives: ' + lives);
+    
+    }
+    
     
 
     
